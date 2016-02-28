@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="AutoDeploy" default="warFile" name="AutoDeploy">
+
+	<property name="warFileName" value="AutoDeploy.war" />
+
+	<path id="project.lib">
+
+		<fileset dir="${basedir}/lib">
+
+			<include name="**/*.jar" />
+
+		</fileset>
+
+	</path>
+
+	<target name="clean">
+
+		<delete dir="${basedir}/build" />
+
+		<mkdir dir="${basedir}/build" />
+
+	</target>
+
+	<target depends="clean" name="compile">
+
+		<javac destdir="${basedir}/build" includeantruntime="false"
+			srcdir="${basedir}/WebContent/src">
+
+			<classpath refid="project.lib">
+
+			</classpath>
+
+		</javac>
+
+	</target>
+
+	<target depends="compile" name="warFile">
+
+		<delete dir="${basedir}/${warFileName}" />
+
+		<war destfile="${basedir}/${warFileName}" webxml="${basedir}/WebContent/WEB-INF/web.xml">
+
+			<fileset dir="${basedir}/WebContent">
+				<include name="**/**.*" />
+				<exclude name="**/*.jar" />
+				<exclude name="**/*.class" />
+			</fileset>
+
+			<lib dir="${basedir}/WebContent/WEB-INF/lib" />
+
+			<classes dir="${basedir}/build" />
+
+		</war>
+
+	</target>
+
+</project>

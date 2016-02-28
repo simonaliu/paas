@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description/>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.4.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>http://159.226.57.11/fly/AutoDeploy.git</url>
+        <credentialsId>3cb058d1-9c54-4ef9-b9dd-3fd085ac2a80</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.SCMTrigger>
+      <spec>H/2 * * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Ant plugin="ant@1.2">
+      <targets/>
+      <antName>Ant</antName>
+    </hudson.tasks.Ant>
+    <hudson.tasks.Shell>
+      <command>#!/bin/sh 
+ echo &amp;apos;&amp;gt;&amp;gt;&amp;gt; Get old container id&amp;apos; 
+CID=$(docker ps | grep &amp;quot;AutoDeploy&amp;quot; | awk &amp;apos;{print $1}&amp;apos;) 
+echo $CID 
+cp AutoDeploy/AutoDeploy.war /home/liulinyu/docker/tomcat7/tomcat/webapps 
+docker build -t AutoDeploy /home/liulinyu/docker/ | tee /var/lib/jenkins/jobs/AutoDeploy/workspace/build_result.log 
+RESULT=$(cat /var/lib/jenkins/jobs/AutoDeploy/workspace/build_result.log | tail -n 1) 
+#if [[&amp;quot;$RESULT&amp;quot; != *Successfully*]];then 
+#  exit -1 
+#fi 
+echo &amp;apos;&amp;gt;&amp;gt;&amp;gt; Stopping old container&amp;apos;  
+if [ &amp;quot;$CID&amp;quot; != &amp;quot;&amp;quot; ];then  
+docker stop $CID  
+fi 
+echo &amp;apos;&amp;gt;&amp;gt;&amp;gt; Starting new container&amp;apos; 
+docker run -d -p 30000:8081 AutoDeploy
+rm -rf /home/liulinyu/docker/tomcat7/tomcat/webapps/*.jar 
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
